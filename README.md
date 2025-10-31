@@ -11,23 +11,24 @@
 **Status**: ✅ **COMPLETE** - Backend + Frontend Fully Implemented
 **Version**: 1.0.0
 **Developer**: Samet Ozturk
-**Last Updated**: October 28, 2025
+**Last Updated**: October 31, 2025
+
+**Note:** Built with modern development tools including Claude Code for AI-assisted development.
 
 ---
 
 ## 🌐 Live Demo
 
-**Application URL:** [https://your-app.vercel.app](https://your-app.vercel.app) *(Update after deployment)*
+**Application URL:** [https://taskify-maskify.netlify.app](https://taskify-maskify.netlify.app)
 
 **Demo Credentials:**
 ```
-Email: demo@taskmanager.com
-Password: DemoPassword123
+Create your own account or use demo credentials if provided
 ```
 
-**Note:** First load may take ~30 seconds as the free-tier backend wakes from sleep.
+**Note:** First load may take ~30 seconds as the free-tier backend wakes from sleep (Render.com free tier limitation).
 
-**API Documentation (Swagger):** [Backend Swagger UI](https://your-backend.onrender.com/swagger-ui.html) *(Update after deployment)*
+**API Documentation (Swagger):** [https://task-manager-backend-5pwe.onrender.com/swagger-ui.html](https://task-manager-backend-5pwe.onrender.com/swagger-ui.html)
 
 ---
 
@@ -1643,10 +1644,11 @@ This is a portfolio project, but feedback and suggestions are welcome!
 **Tech Focus**: Spring Boot, React, PostgreSQL, JWT Authentication
 
 ### Links
-- **Live Demo**: [Coming Soon]
-- **Backend Swagger**: http://localhost:8080/swagger-ui.html
-- **GitHub**: [Your Repository URL]
-- **LinkedIn**: [Your LinkedIn]
+- **Live Demo**: [https://taskify-maskify.netlify.app](https://taskify-maskify.netlify.app)
+- **Backend API**: [https://task-manager-backend-5pwe.onrender.com/swagger-ui.html](https://task-manager-backend-5pwe.onrender.com/swagger-ui.html)
+- **GitHub**: [https://github.com/0zturkSamet/task-manager](https://github.com/0zturkSamet/task-manager)
+- **LinkedIn**: [Add your LinkedIn URL here]
+- **Portfolio**: [Add your portfolio URL here]
 
 ---
 
@@ -1668,5 +1670,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **⭐ Star this repository if you find it helpful!**
 
-**Last Updated**: October 19, 2025
-**Project Status**: ✅ Complete - Production Ready
+---
+
+## 📸 Screenshots
+
+*Screenshots coming soon! Feel free to explore the [live demo](https://taskify-maskify.netlify.app) in the meantime.*
+
+---
+
+**Last Updated**: October 31, 2025
+**Project Status**: ✅ Complete - Production Ready - Deployed
