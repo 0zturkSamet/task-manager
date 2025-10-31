@@ -10,7 +10,7 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
   const { user } = useAuth();
 
   const handleCardClick = () => {
-    navigate(`/projects/${project.id}`);
+    navigate(`/app/projects/${project.id}`);
   };
 
   // Permission checks
