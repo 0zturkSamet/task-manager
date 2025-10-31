@@ -5,6 +5,7 @@
 # IDE Files
 .idea/
 .vscode/
+.claude/
 *.iml
 *.iws
 *.ipr
@@ -81,3 +82,7 @@ yarn.lock.backup
 # Misc
 .cache/
 .temp/
+
+# Personal Development Notes (keep locally, not in repo)
+SESSION_PROGRESS.md
+GITHUB_SETUP.md
