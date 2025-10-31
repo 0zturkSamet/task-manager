@@ -55,7 +55,7 @@ const Tasks = () => {
   };
 
   const handleView = (task) => {
-    navigate(`/tasks/${task.id}`);
+    navigate(`/app/tasks/${task.id}`);
   };
 
   const handleDeleteConfirm = async () => {
