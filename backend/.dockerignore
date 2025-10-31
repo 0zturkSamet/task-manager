@@ -1,0 +1,57 @@
+# Docker ignore file for Spring Boot backend
+# Excludes unnecessary files from Docker build context
+
+# Build artifacts
+target/
+*.jar
+*.war
+*.ear
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE files
+.idea/
+.vscode/
+.classpath
+.project
+.settings/
+*.iml
+*.iws
+*.ipr
+
+# Environment files (secrets should be passed via environment variables)
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+logs/
+backend.log
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in container)
+README.md
+*.md
+
+# Test files
+src/test/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
