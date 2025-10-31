@@ -62,7 +62,7 @@ const NotificationDropdown = ({ isOpen, onClose, onNotificationCountChange }) =>
 
       // Navigate to task detail if taskId exists
       if (notification.taskId) {
-        navigate(`/tasks/${notification.taskId}`);
+        navigate(`/app/tasks/${notification.taskId}`);
         onClose();
       }
     } catch (error) {
@@ -185,7 +185,7 @@ const NotificationDropdown = ({ isOpen, onClose, onNotificationCountChange }) =>
         <div className="border-t border-secondary-100 px-4 py-2">
           <button
             onClick={() => {
-              navigate('/notifications');
+              navigate('/app/notifications');
               onClose();
             }}
             className="text-xs text-primary-600 hover:text-primary-700 font-medium w-full text-center"

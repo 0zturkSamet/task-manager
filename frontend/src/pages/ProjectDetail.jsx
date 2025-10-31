@@ -56,7 +56,7 @@ const ProjectDetail = () => {
       setMembers(membersData);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to load project details');
-      navigate('/projects');
+      navigate('/app/projects');
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ const ProjectDetail = () => {
     try {
       await projectService.deleteProject(id);
       toast.success('Project deleted successfully!');
-      navigate('/projects');
+      navigate('/app/projects');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to delete project');
     } finally {
@@ -100,7 +100,7 @@ const ProjectDetail = () => {
   };
 
   const handleTaskClick = (taskId) => {
-    navigate(`/tasks/${taskId}`);
+    navigate(`/app/tasks/${taskId}`);
   };
 
   // Permission checks
@@ -141,7 +141,7 @@ const ProjectDetail = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/projects')}
+          onClick={() => navigate('/app/projects')}
           className="flex items-center gap-2 text-secondary-600 hover:text-secondary-900 mb-4 smooth-transition"
         >
           <ArrowLeft className="w-4 h-4" />

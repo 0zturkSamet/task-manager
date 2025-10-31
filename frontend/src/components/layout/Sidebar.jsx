@@ -15,28 +15,28 @@ const Sidebar = () => {
 
   const navItems = [
     {
-      path: '/dashboard',
+      path: '/app/dashboard',
       icon: LayoutDashboard,
       label: 'Dashboard',
       color: '#4285f4', // Google Blue
       bgColor: '#e8f0fe'
     },
     {
-      path: '/projects',
+      path: '/app/projects',
       icon: FolderKanban,
       label: 'Projects',
       color: '#ff9800', // Material Orange
       bgColor: '#fff3e0'
     },
     {
-      path: '/tasks',
+      path: '/app/tasks',
       icon: CheckSquare,
       label: 'Tasks',
       color: '#34a853', // Google Green
       bgColor: '#e6f4ea'
     },
     {
-      path: '/kanban',
+      path: '/app/kanban',
       icon: Columns,
       label: 'Kanban Board',
       color: '#9c27b0', // Material Purple

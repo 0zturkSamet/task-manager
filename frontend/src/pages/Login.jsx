@@ -43,7 +43,7 @@ const Login = () => {
     setLoading(true);
     try {
       await login(formData);
-      navigate('/dashboard');
+      navigate('/app/dashboard');
     } catch (err) {
       console.error('Login failed:', err);
     } finally {

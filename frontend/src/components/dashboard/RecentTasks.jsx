@@ -8,7 +8,7 @@ const RecentTasks = ({ tasks, onCreateTask }) => {
     <div className="card">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900">Recent Tasks</h2>
-        <Link to="/tasks" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+        <Link to="/app/tasks" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
           View All
         </Link>
       </div>

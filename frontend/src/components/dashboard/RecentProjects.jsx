@@ -8,7 +8,7 @@ const RecentProjects = ({ projects, onCreateProject }) => {
     <div className="card">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
-        <Link to="/projects" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+        <Link to="/app/projects" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
           View All
         </Link>
       </div>
@@ -29,7 +29,7 @@ const RecentProjects = ({ projects, onCreateProject }) => {
           {projects.slice(0, 5).map((project) => (
             <Link
               key={project.id}
-              to={`/projects/${project.id}`}
+              to={`/app/projects/${project.id}`}
               className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <div className="flex items-center gap-3">

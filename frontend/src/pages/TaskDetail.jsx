@@ -51,7 +51,7 @@ const TaskDetail = () => {
       setTask(data);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to load task details');
-      navigate('/tasks');
+      navigate('/app/tasks');
     } finally {
       setLoading(false);
     }
@@ -83,7 +83,7 @@ const TaskDetail = () => {
     try {
       await taskService.deleteTask(id);
       toast.success('Task deleted successfully!');
-      navigate('/tasks');
+      navigate('/app/tasks');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to delete task');
     } finally {

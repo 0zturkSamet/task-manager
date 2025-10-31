@@ -48,7 +48,7 @@ const Register = () => {
       // Remove confirmPassword before sending to API
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
-      navigate('/dashboard');
+      navigate('/app/dashboard');
     } catch (err) {
       console.error('Registration failed:', err);
     } finally {

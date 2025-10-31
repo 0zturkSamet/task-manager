@@ -34,7 +34,7 @@ const ProfileDropdown = () => {
 
   const handleSettings = () => {
     setIsOpen(false);
-    navigate('/settings');
+    navigate('/app/settings');
   };
 
   return (

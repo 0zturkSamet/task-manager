@@ -82,8 +82,8 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setUser(null);
       setError(null);
-      // Navigate to login page
-      window.location.href = '/login';
+      // Navigate to landing page
+      window.location.href = '/';
     }
   };
 
