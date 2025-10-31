@@ -43,6 +43,15 @@ function App() {
               <Route path="kanban" element={<Kanban />} />
               <Route path="settings" element={<ProfileSettings />} />
             </Route>
+
+            {/* Legacy route redirects for backward compatibility */}
+            <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
+            <Route path="/projects" element={<Navigate to="/app/projects" replace />} />
+            <Route path="/projects/:id" element={<Navigate to="/app/projects/:id" replace />} />
+            <Route path="/tasks" element={<Navigate to="/app/tasks" replace />} />
+            <Route path="/tasks/:id" element={<Navigate to="/app/tasks/:id" replace />} />
+            <Route path="/kanban" element={<Navigate to="/app/kanban" replace />} />
+            <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
           </Routes>
         </AuthProvider>
       </ToastProvider>
