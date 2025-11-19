@@ -11,12 +11,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -52,19 +54,44 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    @Operation(summary = "Get all users", description = "Returns all active users in the system for task assignment")
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
+    @Operation(summary = "Get all users", description = "Returns active users (limited to 50). Requires authentication.")
+    public ResponseEntity<List<UserResponse>> getAllUsers(@AuthenticationPrincipal User user) {
+        // Require authentication to prevent user enumeration
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // Limit results to prevent data scraping
         List<UserResponse> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+        // Return max 50 users to prevent enumeration attacks
+        List<UserResponse> limitedUsers = users.stream()
+                .limit(50)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(limitedUsers);
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Search users", description = "Search for users by email, first name, or last name")
+    @Operation(summary = "Search users", description = "Search for users by email, first name, or last name. Requires authentication.")
     public ResponseEntity<List<UserResponse>> searchUsers(
+            @AuthenticationPrincipal User user,
             @Parameter(description = "Search term") @RequestParam String q
     ) {
+        // Require authentication to prevent user enumeration
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // Minimum search term length to prevent enumeration
+        if (q == null || q.trim().length() < 2) {
+            return ResponseEntity.badRequest().build();
+        }
+
         List<UserResponse> users = userService.searchUsers(q);
-        return ResponseEntity.ok(users);
+        // Limit results to prevent data scraping
+        List<UserResponse> limitedUsers = users.stream()
+                .limit(20)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(limitedUsers);
     }
 
     @GetMapping("/statistics")

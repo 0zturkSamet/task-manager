@@ -39,18 +39,19 @@ spring:
     password: ${DATABASE_PASSWORD:postgres}
 
 # JWT Configuration
+# IMPORTANT: JWT_SECRET environment variable MUST be set!
+# Generate a secure secret: openssl rand -base64 64
 jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 hours in milliseconds
 
 # Swagger/OpenAPI Configuration
+# Swagger is disabled by default for security. Enable only in dev profile.
 springdoc:
   api-docs:
-    path: /api-docs
+    enabled: false
   swagger-ui:
-    path: /swagger-ui.html
-    operations-sorter: method
-    tags-sorter: alpha
+    enabled: false
 
 # Server Configuration
 server:
@@ -62,10 +63,10 @@ server:
 # Logging
 logging:
   level:
-    root: INFO
-    com.taskmanager: DEBUG
-    org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
+    root: WARN
+    com.taskmanager: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
 
 ---
 # Development Profile
@@ -76,6 +77,17 @@ spring:
 
   jpa:
     show-sql: true
+
+# Enable Swagger in dev environment only
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
 
 logging:
   level:
