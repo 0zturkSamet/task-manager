@@ -33,10 +33,12 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     validate-on-migrate: true
-    # Use direct connection for migrations (not connection pooler)
-    url: ${FLYWAY_URL:jdbc:postgresql://localhost:5432/taskmanager}
-    user: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:postgres}
+    # Flyway will use main datasource by default
+    # Only set FLYWAY_URL if you need a direct connection (e.g., Supabase direct: db.<ref>.supabase.co:5432)
+    # If not set, Flyway uses DATABASE_URL (pooler works with prepareThreshold=0)
+    url: ${FLYWAY_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/taskmanager}}
+    user: ${FLYWAY_USER:${DATABASE_USERNAME:postgres}}
+    password: ${FLYWAY_PASSWORD:${DATABASE_PASSWORD:postgres}}
 
 # JWT Configuration
 jwt:

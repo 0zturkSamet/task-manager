@@ -22,15 +22,20 @@ services:
     # Configure these in Render Dashboard: Settings > Environment
     envVars:
       # Database Configuration (from Supabase)
+      # Required: Use transaction pooler URL (port 6543) with prepareThreshold=0
       - key: DATABASE_URL
         sync: false  # Set manually in Render dashboard
 
-      - key: FLYWAY_URL
-        sync: false  # Set manually in Render dashboard
+      # Optional: Direct connection for Flyway (only if pooler doesn't work for migrations)
+      # Use db.<project-ref>.supabase.co:5432 (NOT pooler.supabase.com:5432)
+      # - key: FLYWAY_URL
+      #   sync: false
 
+      # Required: postgres.<project-ref> for Supabase
       - key: DATABASE_USERNAME
         sync: false  # Set manually in Render dashboard
 
+      # Required: Your Supabase database password
       - key: DATABASE_PASSWORD
         sync: false  # Set manually in Render dashboard
 
@@ -64,11 +69,11 @@ services:
 #    - Render will auto-detect this file
 #
 # 3. Add Environment Variables:
-#    Copy from your local .env file:
-#    - DATABASE_URL
-#    - FLYWAY_URL
-#    - DATABASE_USERNAME
+#    Copy from your Supabase dashboard:
+#    - DATABASE_URL (transaction pooler, port 6543, add ?prepareThreshold=0)
+#    - DATABASE_USERNAME (format: postgres.<project-ref>)
 #    - DATABASE_PASSWORD
+#    - FLYWAY_URL (optional, only if migrations fail through pooler)
 #
 # 4. Deploy!
 #    - First deployment takes ~5-7 minutes
