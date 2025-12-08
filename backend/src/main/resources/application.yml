@@ -29,16 +29,20 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
-    enabled: true
+    enabled: ${FLYWAY_ENABLED:true}
     locations: classpath:db/migration
     baseline-on-migrate: true
     validate-on-migrate: true
-    # Flyway will use main datasource by default
-    # Only set FLYWAY_URL if you need a direct connection (e.g., Supabase direct: db.<ref>.supabase.co:5432)
-    # If not set, Flyway uses DATABASE_URL (pooler works with prepareThreshold=0)
+    # IMPORTANT for Supabase: Flyway MUST use the DIRECT database connection (port 5432)
+    # NOT the connection pooler (port 6543). Set FLYWAY_URL to the direct connection:
+    # Example: jdbc:postgresql://db.PROJECT_REF.supabase.co:5432/postgres
+    # FLYWAY_USER should be "postgres" (not postgres.PROJECT_REF) for direct connections
     url: ${FLYWAY_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/taskmanager}}
     user: ${FLYWAY_USER:${DATABASE_USERNAME:postgres}}
     password: ${FLYWAY_PASSWORD:${DATABASE_PASSWORD:postgres}}
+    # Connection retry settings for reliability
+    connect-retries: 3
+    connect-retries-interval: 5
 
 # JWT Configuration
 jwt:

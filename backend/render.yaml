@@ -21,23 +21,38 @@ services:
     # Environment Variables
     # Configure these in Render Dashboard: Settings > Environment
     envVars:
-      # Database Configuration (from Supabase)
-      # Required: Use transaction pooler URL (port 6543) with prepareThreshold=0
+      # ===========================================
+      # DATABASE CONFIGURATION (from Supabase)
+      # ===========================================
+
+      # APPLICATION DATABASE (pooler connection - port 6543)
+      # Format: jdbc:postgresql://aws-0-REGION.pooler.supabase.com:6543/postgres?prepareThreshold=0
       - key: DATABASE_URL
         sync: false  # Set manually in Render dashboard
 
-      # Optional: Direct connection for Flyway (only if pooler doesn't work for migrations)
-      # Use db.<project-ref>.supabase.co:5432 (NOT pooler.supabase.com:5432)
-      # - key: FLYWAY_URL
-      #   sync: false
-
-      # Required: postgres.<project-ref> for Supabase
+      # Pooler username format: postgres.PROJECT_REF
       - key: DATABASE_USERNAME
         sync: false  # Set manually in Render dashboard
 
-      # Required: Your Supabase database password
+      # Your Supabase database password
       - key: DATABASE_PASSWORD
         sync: false  # Set manually in Render dashboard
+
+      # ===========================================
+      # FLYWAY MIGRATION DATABASE (REQUIRED for Supabase!)
+      # Flyway MUST use DIRECT connection, NOT the pooler!
+      # ===========================================
+
+      # REQUIRED: Direct database URL (port 5432, NOT 6543!)
+      # Format: jdbc:postgresql://db.PROJECT_REF.supabase.co:5432/postgres
+      - key: FLYWAY_URL
+        sync: false  # Set manually in Render dashboard
+
+      # REQUIRED: Direct connection username (just "postgres", NOT postgres.PROJECT_REF)
+      - key: FLYWAY_USER
+        value: postgres
+
+      # Uses same password as DATABASE_PASSWORD (automatically inherited)
 
       # JWT Configuration
       - key: JWT_SECRET
@@ -68,12 +83,22 @@ services:
 #    - Connect your GitHub repository
 #    - Render will auto-detect this file
 #
-# 3. Add Environment Variables:
-#    Copy from your Supabase dashboard:
-#    - DATABASE_URL (transaction pooler, port 6543, add ?prepareThreshold=0)
-#    - DATABASE_USERNAME (format: postgres.<project-ref>)
-#    - DATABASE_PASSWORD
-#    - FLYWAY_URL (optional, only if migrations fail through pooler)
+# 3. Add Environment Variables (from Supabase Dashboard):
+#
+#    For the APPLICATION (pooler connection):
+#    - DATABASE_URL: jdbc:postgresql://aws-0-REGION.pooler.supabase.com:6543/postgres?prepareThreshold=0
+#    - DATABASE_USERNAME: postgres.YOUR_PROJECT_REF (with project reference!)
+#    - DATABASE_PASSWORD: your database password
+#
+#    For FLYWAY MIGRATIONS (direct connection - REQUIRED!):
+#    - FLYWAY_URL: jdbc:postgresql://db.YOUR_PROJECT_REF.supabase.co:5432/postgres
+#    - FLYWAY_USER: postgres (just "postgres", NOT postgres.PROJECT_REF)
+#    - FLYWAY_PASSWORD is optional (uses DATABASE_PASSWORD if not set)
+#
+#    Where to find these in Supabase:
+#    - Go to Project Settings > Database
+#    - Connection string section shows both pooler and direct URLs
+#    - YOUR_PROJECT_REF is your project reference (e.g., "abcdefghijklm")
 #
 # 4. Deploy!
 #    - First deployment takes ~5-7 minutes
