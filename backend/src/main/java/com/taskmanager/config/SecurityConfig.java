@@ -69,7 +69,8 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://localhost:5174",
                 "https://*.vercel.app",
-                "https://*.netlify.app"
+                "https://*.netlify.app",
+                "https://*.onrender.com"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // Security Fix: Explicitly list allowed headers instead of using "*" to prevent header injection attacks
