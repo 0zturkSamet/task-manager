@@ -555,11 +555,10 @@ public class TimeTrackerService {
                 .collect(Collectors.groupingBy(e -> e.getStartTime().toLocalDate()));
 
         // Generate daily missed hours for all working days in the range
-        List<MissedHoursReportResponse.DailyMissedHours> dailyMissedHours = java.time.temporal.ChronoUnit.DAYS
-                .between(startDate.toLocalDate(), endDate.toLocalDate().plusDays(1))
-                .intValue() > 0 ?
-                java.util.stream.IntStream.range(0, (int) java.time.temporal.ChronoUnit.DAYS
-                        .between(startDate.toLocalDate(), endDate.toLocalDate().plusDays(1)))
+        long daysBetween = java.time.temporal.ChronoUnit.DAYS
+                .between(startDate.toLocalDate(), endDate.toLocalDate().plusDays(1));
+        List<MissedHoursReportResponse.DailyMissedHours> dailyMissedHours = daysBetween > 0 ?
+                java.util.stream.IntStream.range(0, (int) daysBetween)
                 .mapToObj(i -> startDate.toLocalDate().plusDays(i))
                 .map(date -> {
                     String dayOfWeek = date.getDayOfWeek().name();
