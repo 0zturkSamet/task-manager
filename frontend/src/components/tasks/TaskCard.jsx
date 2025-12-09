@@ -1,11 +1,38 @@
-import { Calendar, Clock, MoreVertical, User } from 'lucide-react';
+import { Calendar, Clock, MoreVertical, User, Play, Square } from 'lucide-react';
 import { useState } from 'react';
 import Badge from '../common/Badge';
 import MemberAvatar from '../common/MemberAvatar';
+import Timer from '../common/Timer';
+import { useTimeTracker } from '../../hooks/useTimeTracker';
 import { formatDate, isOverdue } from '../../utils/helpers';
 
 const TaskCard = ({ task, onEdit, onDelete, onView }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const { activeTimer, startTimer, stopTimer, isTimerActive } = useTimeTracker();
+  const [startingTimer, setStartingTimer] = useState(false);
+
+  const handleStartTimer = async (e) => {
+    e.stopPropagation();
+    try {
+      setStartingTimer(true);
+      await startTimer(task.id);
+    } catch (error) {
+      console.error('Failed to start timer:', error);
+    } finally {
+      setStartingTimer(false);
+    }
+  };
+
+  const handleStopTimer = async (e) => {
+    e.stopPropagation();
+    try {
+      await stopTimer();
+    } catch (error) {
+      console.error('Failed to stop timer:', error);
+    }
+  };
+
+  const isActive = isTimerActive(task.id);
 
   return (
     <div className="card hover:shadow-md transition-shadow cursor-pointer" onClick={onView}>
@@ -61,38 +88,73 @@ const TaskCard = ({ task, onEdit, onDelete, onView }) => {
         <Badge type="priority" value={task.priority} />
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 text-xs text-gray-500">
-          {task.dueDate && (
-            <div className={`flex items-center gap-1 ${isOverdue(task.dueDate, task.status) ? 'text-red-600 font-medium' : ''}`}>
-              <Calendar className="w-3 h-3" />
-              <span>{formatDate(task.dueDate)}</span>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 text-xs text-gray-500">
+            {task.dueDate && (
+              <div className={`flex items-center gap-1 ${isOverdue(task.dueDate, task.status) ? 'text-red-600 font-medium' : ''}`}>
+                <Calendar className="w-3 h-3" />
+                <span>{formatDate(task.dueDate)}</span>
+              </div>
+            )}
+            {(task.estimatedHours || task.actualHours) && (
+              <div className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                <span>
+                  {task.actualHours ? `${task.actualHours}h` : '0h'}
+                  {task.estimatedHours && ` / ${task.estimatedHours}h`}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {task.assignedToId ? (
+            <div className="flex items-center gap-1" title={task.assignedToName}>
+              <MemberAvatar
+                user={{
+                  firstName: task.assignedToName?.split(' ')[0] || '',
+                  lastName: task.assignedToName?.split(' ')[1] || '',
+                  email: task.assignedToEmail || ''
+                }}
+                size="sm"
+              />
             </div>
-          )}
-          {task.estimatedHours && (
-            <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              <span>{task.estimatedHours}h</span>
+          ) : (
+            <div className="flex items-center gap-1 text-gray-400" title="Unassigned">
+              <User className="w-4 h-4" />
             </div>
           )}
         </div>
 
-        {task.assignedToId ? (
-          <div className="flex items-center gap-1" title={task.assignedToName}>
-            <MemberAvatar
-              user={{
-                firstName: task.assignedToName?.split(' ')[0] || '',
-                lastName: task.assignedToName?.split(' ')[1] || '',
-                email: task.assignedToEmail || ''
-              }}
-              size="sm"
-            />
-          </div>
-        ) : (
-          <div className="flex items-center gap-1 text-gray-400" title="Unassigned">
-            <User className="w-4 h-4" />
-          </div>
-        )}
+        {/* Timer Controls */}
+        <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2">
+          {isActive ? (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-md flex-1">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-gray-600">Timer running:</span>
+              </div>
+              <Timer startTime={activeTimer?.startTime} className="text-sm font-semibold text-blue-600" />
+              <button
+                onClick={handleStopTimer}
+                className="ml-auto p-1 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                title="Stop timer"
+              >
+                <Square className="w-3 h-3" fill="currentColor" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleStartTimer}
+              disabled={startingTimer || (activeTimer && !isActive)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title={activeTimer && !isActive ? 'Stop current timer first' : 'Start timer'}
+            >
+              <Play className="w-3 h-3" />
+              <span>{startingTimer ? 'Starting...' : 'Start Timer'}</span>
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

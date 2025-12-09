@@ -3,6 +3,7 @@ import { Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ProfileDropdown from './ProfileDropdown';
 import NotificationDropdown from './NotificationDropdown';
+import GlobalTimerWidget from './GlobalTimerWidget';
 import notificationService from '../../services/notificationService';
 
 const Navbar = () => {
@@ -47,6 +48,9 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Global Timer Widget */}
+          <GlobalTimerWidget />
+
           {/* Notifications */}
           <div className="relative">
             <button

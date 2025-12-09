@@ -35,6 +35,18 @@ export const API_ENDPOINTS = {
     LIKE_COMMENT: (commentId) => `/comments/${commentId}/like`,
     DISLIKE_COMMENT: (commentId) => `/comments/${commentId}/dislike`,
   },
+  // Time Tracking
+  TIME_TRACKER: {
+    START_TIMER: '/timer/start',
+    STOP_TIMER: '/timer/stop',
+    ACTIVE_TIMER: '/timer/active',
+    TIME_ENTRIES: '/time-entries',
+    TIME_ENTRY_BY_ID: (id) => `/time-entries/${id}`,
+    TIME_SUMMARY: '/reports/time-summary',
+    TASK_TIME_SUMMARY: (taskId) => `/tasks/${taskId}/time-summary`,
+    TODAY: '/time-tracking/today',
+    WEEK: '/time-tracking/week',
+  },
 };
 
 // Storage Keys
