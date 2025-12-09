@@ -218,4 +218,65 @@ public class TimeTrackerController {
                 "entryCount", entries.size()
         ));
     }
+
+    // ===== Monthly & Yearly Reports =====
+
+    @GetMapping("/reports/monthly")
+    @Operation(summary = "Get monthly report", description = "Returns time tracking summary for a specific month")
+    public ResponseEntity<TimeSummaryResponse> getMonthlyReport(
+            @AuthenticationPrincipal User user,
+            @Parameter(description = "Month in format YYYY-MM (e.g., 2025-01)", required = true) @RequestParam String month
+    ) {
+        // Parse month string to get start and end dates
+        String[] parts = month.split("-");
+        int year = Integer.parseInt(parts[0]);
+        int monthNum = Integer.parseInt(parts[1]);
+
+        LocalDateTime startDate = LocalDateTime.of(year, monthNum, 1, 0, 0, 0);
+        LocalDateTime endDate = startDate.plusMonths(1).minusSeconds(1);
+
+        TimeSummaryResponse response = timeTrackerService.getTimeSummary(user.getId(), startDate, endDate);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/reports/yearly")
+    @Operation(summary = "Get yearly report", description = "Returns time tracking summary for a specific year")
+    public ResponseEntity<TimeSummaryResponse> getYearlyReport(
+            @AuthenticationPrincipal User user,
+            @Parameter(description = "Year (e.g., 2025)", required = true) @RequestParam int year
+    ) {
+        LocalDateTime startDate = LocalDateTime.of(year, 1, 1, 0, 0, 0);
+        LocalDateTime endDate = LocalDateTime.of(year, 12, 31, 23, 59, 59);
+
+        TimeSummaryResponse response = timeTrackerService.getTimeSummary(user.getId(), startDate, endDate);
+        return ResponseEntity.ok(response);
+    }
+
+    // ===== Overtime & Missed Hours Endpoints =====
+
+    @GetMapping("/reports/overtime")
+    @Operation(summary = "Get overtime report", description = "Returns overtime report showing hours worked beyond expected hours")
+    public ResponseEntity<OvertimeReportResponse> getOvertimeReport(
+            @AuthenticationPrincipal User user,
+            @Parameter(description = "Start date (ISO format)", required = true) @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @Parameter(description = "End date (ISO format)", required = true) @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
+    ) {
+        OvertimeReportResponse response = timeTrackerService.getOvertimeReport(user.getId(), startDate, endDate);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/reports/missed-hours")
+    @Operation(summary = "Get missed hours report", description = "Returns missed hours report showing days with insufficient hours")
+    public ResponseEntity<MissedHoursReportResponse> getMissedHoursReport(
+            @AuthenticationPrincipal User user,
+            @Parameter(description = "Start date (ISO format)", required = true) @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @Parameter(description = "End date (ISO format)", required = true) @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
+    ) {
+        MissedHoursReportResponse response = timeTrackerService.getMissedHoursReport(user.getId(), startDate, endDate);
+        return ResponseEntity.ok(response);
+    }
 }

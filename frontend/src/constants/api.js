@@ -46,6 +46,13 @@ export const API_ENDPOINTS = {
     TASK_TIME_SUMMARY: (taskId) => `/tasks/${taskId}/time-summary`,
     TODAY: '/time-tracking/today',
     WEEK: '/time-tracking/week',
+    MONTHLY: '/reports/monthly',
+    YEARLY: '/reports/yearly',
+    OVERTIME: '/reports/overtime',
+    MISSED_HOURS: '/reports/missed-hours',
+  },
+  WORKING_HOURS: {
+    CONFIG: '/working-hours/config',
   },
 };
 

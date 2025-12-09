@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Clock, Calendar, Play, Square } from 'lucide-react';
+import { Clock, Calendar, Play, Square, Edit2, Trash2, TrendingUp, AlertCircle } from 'lucide-react';
 import { useTimeTracker } from '../hooks/useTimeTracker';
 import { useToast } from '../context/ToastContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import Timer from '../components/common/Timer';
 import timeTrackerService from '../services/timeTrackerService';
+import EditTimeEntryModal from '../components/modals/EditTimeEntryModal';
+import DeleteTimeEntryModal from '../components/modals/DeleteTimeEntryModal';
 
 const TimeTracking = () => {
   const { activeTimer, stopTimer } = useTimeTracker();
@@ -13,6 +15,11 @@ const TimeTracking = () => {
   const [loading, setLoading] = useState(true);
   const [todayStats, setTodayStats] = useState(null);
   const [weekStats, setWeekStats] = useState(null);
+  const [overtimeStats, setOvertimeStats] = useState(null);
+  const [missedHoursStats, setMissedHoursStats] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -21,14 +28,31 @@ const TimeTracking = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [entries, today, week] = await Promise.all([
+
+      // Calculate date ranges
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - 7);
+
+      const [entries, today, week, overtime, missedHours] = await Promise.all([
         timeTrackerService.getTimeEntries(),
         timeTrackerService.getTodayTime(),
-        timeTrackerService.getWeekTime()
+        timeTrackerService.getWeekTime(),
+        timeTrackerService.getOvertimeReport(
+          startOfWeek.toISOString(),
+          now.toISOString()
+        ),
+        timeTrackerService.getMissedHoursReport(
+          startOfWeek.toISOString(),
+          now.toISOString()
+        )
       ]);
+
       setTimeEntries(entries);
       setTodayStats(today);
       setWeekStats(week);
+      setOvertimeStats(overtime);
+      setMissedHoursStats(missedHours);
     } catch (error) {
       console.error('Failed to load time tracking data:', error);
       toast.error('Failed to load time tracking data');
@@ -45,6 +69,20 @@ const TimeTracking = () => {
     } catch (error) {
       toast.error('Failed to stop timer');
     }
+  };
+
+  const handleEditEntry = (entry) => {
+    setSelectedEntry(entry);
+    setEditModalOpen(true);
+  };
+
+  const handleDeleteEntry = (entry) => {
+    setSelectedEntry(entry);
+    setDeleteModalOpen(true);
+  };
+
+  const handleModalSuccess = () => {
+    loadData(); // Reload data after edit/delete
   };
 
   const formatDuration = (minutes) => {
@@ -110,7 +148,7 @@ const TimeTracking = () => {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -158,6 +196,36 @@ const TimeTracking = () => {
             {timeEntries.filter(e => e.durationMinutes).length} entries
           </p>
         </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <TrendingUp className="w-5 h-5 text-green-600" />
+            </div>
+            <h3 className="font-semibold text-gray-700">Overtime</h3>
+          </div>
+          <p className="text-3xl font-bold text-green-600">
+            +{overtimeStats?.totalOvertimeHours?.toFixed(2) || 0}h
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            Last 7 days
+          </p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-red-100 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+            </div>
+            <h3 className="font-semibold text-gray-700">Missed Hours</h3>
+          </div>
+          <p className="text-3xl font-bold text-red-600">
+            -{missedHoursStats?.totalMissedHours?.toFixed(2) || 0}h
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            {missedHoursStats?.daysWithMissedHours || 0} days
+          </p>
+        </div>
       </div>
 
       {/* Time Entries List */}
@@ -194,6 +262,9 @@ const TimeTracking = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Duration
                   </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -229,6 +300,24 @@ const TimeTracking = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {entry.durationMinutes ? formatDuration(entry.durationMinutes) : '-'}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEditEntry(entry)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit entry"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEntry(entry)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete entry"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -236,6 +325,20 @@ const TimeTracking = () => {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      <EditTimeEntryModal
+        entry={selectedEntry}
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSuccess={handleModalSuccess}
+      />
+      <DeleteTimeEntryModal
+        entry={selectedEntry}
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onSuccess={handleModalSuccess}
+      />
     </div>
   );
 };
