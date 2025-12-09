@@ -129,6 +129,75 @@ class TimeTrackerService {
     return response.data;
   }
 
+  /**
+   * Get monthly time tracking report
+   * @param {string} month - Month in format YYYY-MM (e.g., "2025-01")
+   * @returns {Promise} Monthly summary
+   */
+  async getMonthlyReport(month) {
+    const response = await api.get(API_ENDPOINTS.TIME_TRACKER.MONTHLY, {
+      params: { month }
+    });
+    return response.data;
+  }
+
+  /**
+   * Get yearly time tracking report
+   * @param {number} year - Year (e.g., 2025)
+   * @returns {Promise} Yearly summary
+   */
+  async getYearlyReport(year) {
+    const response = await api.get(API_ENDPOINTS.TIME_TRACKER.YEARLY, {
+      params: { year }
+    });
+    return response.data;
+  }
+
+  /**
+   * Get overtime report
+   * @param {string} startDate - ISO date string
+   * @param {string} endDate - ISO date string
+   * @returns {Promise} Overtime report data
+   */
+  async getOvertimeReport(startDate, endDate) {
+    const response = await api.get(API_ENDPOINTS.TIME_TRACKER.OVERTIME, {
+      params: { startDate, endDate }
+    });
+    return response.data;
+  }
+
+  /**
+   * Get missed hours report
+   * @param {string} startDate - ISO date string
+   * @param {string} endDate - ISO date string
+   * @returns {Promise} Missed hours report data
+   */
+  async getMissedHoursReport(startDate, endDate) {
+    const response = await api.get(API_ENDPOINTS.TIME_TRACKER.MISSED_HOURS, {
+      params: { startDate, endDate }
+    });
+    return response.data;
+  }
+
+  /**
+   * Get working hours configuration
+   * @returns {Promise} Working hours config
+   */
+  async getWorkingHoursConfig() {
+    const response = await api.get(API_ENDPOINTS.WORKING_HOURS.CONFIG);
+    return response.data;
+  }
+
+  /**
+   * Update working hours configuration
+   * @param {Object} config - Working hours configuration
+   * @returns {Promise} Updated config
+   */
+  async updateWorkingHoursConfig(config) {
+    const response = await api.put(API_ENDPOINTS.WORKING_HOURS.CONFIG, config);
+    return response.data;
+  }
+
   // ===== Helper Methods =====
 
   /**

@@ -31,6 +31,7 @@ public class TimeTrackerService {
     private final TimeEntryRepository timeEntryRepository;
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final WorkingHoursService workingHoursService;
 
     /**
      * Start a new timer for the user
@@ -454,6 +455,167 @@ public class TimeTrackerService {
                 .isRunning(entry.isRunning())
                 .createdAt(entry.getCreatedAt())
                 .updatedAt(entry.getUpdatedAt())
+                .build();
+    }
+
+    /**
+     * Get overtime report for a user within a date range
+     */
+    @Transactional(readOnly = true)
+    public OvertimeReportResponse getOvertimeReport(UUID userId, LocalDateTime startDate, LocalDateTime endDate) {
+        log.info("Fetching overtime report for user ID: {} from {} to {}", userId, startDate, endDate);
+
+        // Get user's working hours configuration
+        WorkingHoursConfigDTO config = workingHoursService.getOrCreateConfig(userId.toString());
+        List<String> workingDays = config.getWorkingDays();
+
+        // Get all time entries in the date range
+        List<TimeEntry> entries = timeEntryRepository.findByUserIdAndDateRange(userId, startDate, endDate);
+        List<TimeEntry> completedEntries = entries.stream()
+                .filter(e -> e.getEndTime() != null)
+                .collect(Collectors.toList());
+
+        // Group by date and calculate daily overtime
+        List<OvertimeReportResponse.DailyOvertime> dailyOvertimes = completedEntries.stream()
+                .collect(Collectors.groupingBy(e -> e.getStartTime().toLocalDate()))
+                .entrySet().stream()
+                .map(entry -> {
+                    java.time.LocalDate date = entry.getKey();
+                    String dayOfWeek = date.getDayOfWeek().name();
+                    boolean isWorkingDay = workingDays.contains(dayOfWeek);
+
+                    double actualHours = entry.getValue().stream()
+                            .mapToInt(TimeEntry::getDurationMinutes)
+                            .sum() / 60.0;
+
+                    BigDecimal expectedHours = isWorkingDay ? config.getExpectedHoursPerDay() : BigDecimal.ZERO;
+                    BigDecimal actualHoursDecimal = BigDecimal.valueOf(actualHours).setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal overtimeHours = actualHoursDecimal.subtract(expectedHours).max(BigDecimal.ZERO);
+
+                    return OvertimeReportResponse.DailyOvertime.builder()
+                            .date(date)
+                            .dayOfWeek(dayOfWeek)
+                            .expectedHours(expectedHours)
+                            .actualHours(actualHoursDecimal)
+                            .overtimeHours(overtimeHours)
+                            .isWorkingDay(isWorkingDay)
+                            .build();
+                })
+                .sorted((a, b) -> a.getDate().compareTo(b.getDate()))
+                .collect(Collectors.toList());
+
+        // Calculate total overtime
+        BigDecimal totalOvertimeHours = dailyOvertimes.stream()
+                .map(OvertimeReportResponse.DailyOvertime::getOvertimeHours)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Calculate weekly summary (last 7 days from end date)
+        java.time.LocalDate weekStart = endDate.toLocalDate().minusDays(6);
+        BigDecimal actualWeekHours = dailyOvertimes.stream()
+                .filter(d -> !d.getDate().isBefore(weekStart))
+                .map(OvertimeReportResponse.DailyOvertime::getActualHours)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal weeklyOvertime = actualWeekHours.subtract(config.getExpectedHoursPerWeek()).max(BigDecimal.ZERO);
+
+        OvertimeReportResponse.WeeklySummary weeklySummary = OvertimeReportResponse.WeeklySummary.builder()
+                .expectedHoursPerWeek(config.getExpectedHoursPerWeek())
+                .actualHoursThisWeek(actualWeekHours)
+                .overtimeHours(weeklyOvertime)
+                .build();
+
+        return OvertimeReportResponse.builder()
+                .startDate(startDate.toLocalDate())
+                .endDate(endDate.toLocalDate())
+                .totalOvertimeHours(totalOvertimeHours)
+                .dailyOvertimes(dailyOvertimes)
+                .weeklySummary(weeklySummary)
+                .build();
+    }
+
+    /**
+     * Get missed hours report for a user within a date range
+     */
+    @Transactional(readOnly = true)
+    public MissedHoursReportResponse getMissedHoursReport(UUID userId, LocalDateTime startDate, LocalDateTime endDate) {
+        log.info("Fetching missed hours report for user ID: {} from {} to {}", userId, startDate, endDate);
+
+        // Get user's working hours configuration
+        WorkingHoursConfigDTO config = workingHoursService.getOrCreateConfig(userId.toString());
+        List<String> workingDays = config.getWorkingDays();
+
+        // Get all time entries in the date range
+        List<TimeEntry> entries = timeEntryRepository.findByUserIdAndDateRange(userId, startDate, endDate);
+        List<TimeEntry> completedEntries = entries.stream()
+                .filter(e -> e.getEndTime() != null)
+                .collect(Collectors.toList());
+
+        // Group by date
+        var entriesByDate = completedEntries.stream()
+                .collect(Collectors.groupingBy(e -> e.getStartTime().toLocalDate()));
+
+        // Generate daily missed hours for all working days in the range
+        List<MissedHoursReportResponse.DailyMissedHours> dailyMissedHours = java.time.temporal.ChronoUnit.DAYS
+                .between(startDate.toLocalDate(), endDate.toLocalDate().plusDays(1))
+                .intValue() > 0 ?
+                java.util.stream.IntStream.range(0, (int) java.time.temporal.ChronoUnit.DAYS
+                        .between(startDate.toLocalDate(), endDate.toLocalDate().plusDays(1)))
+                .mapToObj(i -> startDate.toLocalDate().plusDays(i))
+                .map(date -> {
+                    String dayOfWeek = date.getDayOfWeek().name();
+                    boolean isWorkingDay = workingDays.contains(dayOfWeek);
+
+                    double actualHours = entriesByDate.getOrDefault(date, List.of()).stream()
+                            .mapToInt(TimeEntry::getDurationMinutes)
+                            .sum() / 60.0;
+
+                    BigDecimal expectedHours = isWorkingDay ? config.getExpectedHoursPerDay() : BigDecimal.ZERO;
+                    BigDecimal actualHoursDecimal = BigDecimal.valueOf(actualHours).setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal missedHours = expectedHours.subtract(actualHoursDecimal).max(BigDecimal.ZERO);
+
+                    return MissedHoursReportResponse.DailyMissedHours.builder()
+                            .date(date)
+                            .dayOfWeek(dayOfWeek)
+                            .expectedHours(expectedHours)
+                            .actualHours(actualHoursDecimal)
+                            .missedHours(missedHours)
+                            .isWorkingDay(isWorkingDay)
+                            .build();
+                })
+                .collect(Collectors.toList()) : List.of();
+
+        // Calculate total missed hours
+        BigDecimal totalMissedHours = dailyMissedHours.stream()
+                .map(MissedHoursReportResponse.DailyMissedHours::getMissedHours)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Count days with missed hours
+        long daysWithMissedHours = dailyMissedHours.stream()
+                .filter(d -> d.getMissedHours().compareTo(BigDecimal.ZERO) > 0)
+                .count();
+
+        // Calculate weekly summary (last 7 days from end date)
+        java.time.LocalDate weekStart = endDate.toLocalDate().minusDays(6);
+        BigDecimal actualWeekHours = dailyMissedHours.stream()
+                .filter(d -> !d.getDate().isBefore(weekStart))
+                .map(MissedHoursReportResponse.DailyMissedHours::getActualHours)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal weeklyMissed = config.getExpectedHoursPerWeek().subtract(actualWeekHours).max(BigDecimal.ZERO);
+
+        MissedHoursReportResponse.WeeklySummary weeklySummary = MissedHoursReportResponse.WeeklySummary.builder()
+                .expectedHoursPerWeek(config.getExpectedHoursPerWeek())
+                .actualHoursThisWeek(actualWeekHours)
+                .missedHours(weeklyMissed)
+                .build();
+
+        return MissedHoursReportResponse.builder()
+                .startDate(startDate.toLocalDate())
+                .endDate(endDate.toLocalDate())
+                .totalMissedHours(totalMissedHours)
+                .daysWithMissedHours((int) daysWithMissedHours)
+                .dailyMissedHours(dailyMissedHours)
+                .weeklySummary(weeklySummary)
                 .build();
     }
 }
