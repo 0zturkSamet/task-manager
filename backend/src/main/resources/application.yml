@@ -41,8 +41,10 @@ spring:
     password: ${FLYWAY_PASSWORD:${DATABASE_PASSWORD:postgres}}
 
 # JWT Configuration
+# SECURITY: JWT_SECRET must be set via environment variable in production
+# Do NOT use default values - application will fail to start without proper secret
 jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 hours in milliseconds
 
 # Swagger/OpenAPI Configuration
@@ -79,6 +81,10 @@ spring:
   jpa:
     show-sql: true
 
+# Development-only JWT secret (NEVER use in production)
+jwt:
+  secret: ${JWT_SECRET:ZGV2ZWxvcG1lbnQtb25seS1zZWNyZXQta2V5LWRvLW5vdC11c2UtaW4tcHJvZHVjdGlvbi0xMjM0NTY3ODkw}
+
 logging:
   level:
     root: DEBUG
@@ -93,7 +99,23 @@ spring:
   jpa:
     show-sql: false
 
+# SECURITY: Disable Swagger/OpenAPI in production
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+# SECURITY: Don't expose detailed error messages in production
+server:
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+
 logging:
   level:
     root: WARN
     com.taskmanager: INFO
+    org.springframework.security: WARN
