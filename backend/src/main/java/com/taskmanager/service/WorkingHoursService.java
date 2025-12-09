@@ -26,17 +26,19 @@ public class WorkingHoursService {
 
     @Transactional
     public WorkingHoursConfigDTO getOrCreateConfig(String userId) {
-        UserWorkingHours config = workingHoursRepository.findByUserId(userId)
+        UUID userUuid = UUID.fromString(userId);
+        UserWorkingHours config = workingHoursRepository.findByUserId(userUuid)
                 .orElseGet(() -> createDefaultConfig(userId));
         return toDTO(config);
     }
 
     @Transactional
     public WorkingHoursConfigDTO updateConfig(String userId, WorkingHoursConfigDTO dto) {
-        User user = userRepository.findById(UUID.fromString(userId))
+        UUID userUuid = UUID.fromString(userId);
+        User user = userRepository.findById(userUuid)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        UserWorkingHours config = workingHoursRepository.findByUserId(userId)
+        UserWorkingHours config = workingHoursRepository.findByUserId(userUuid)
                 .orElseGet(() -> UserWorkingHours.builder()
                         .user(user)
                         .build());
@@ -84,7 +86,7 @@ public class WorkingHoursService {
         }
 
         return WorkingHoursConfigDTO.builder()
-                .id(config.getId())
+                .id(config.getId() != null ? config.getId().toString() : null)
                 .expectedHoursPerDay(config.getExpectedHoursPerDay())
                 .expectedHoursPerWeek(config.getExpectedHoursPerWeek())
                 .workingDays(workingDays)

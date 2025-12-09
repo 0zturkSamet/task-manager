@@ -5,10 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface UserWorkingHoursRepository extends JpaRepository<UserWorkingHours, String> {
-    Optional<UserWorkingHours> findByUserId(String userId);
-    boolean existsByUserId(String userId);
-    void deleteByUserId(String userId);
+public interface UserWorkingHoursRepository extends JpaRepository<UserWorkingHours, UUID> {
+    Optional<UserWorkingHours> findByUserId(UUID userId);
+    boolean existsByUserId(UUID userId);
+    void deleteByUserId(UUID userId);
 }
