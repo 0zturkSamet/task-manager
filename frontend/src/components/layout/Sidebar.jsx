@@ -5,6 +5,7 @@ import {
   FolderKanban,
   CheckSquare,
   Columns,
+  Clock,
   Menu,
   X
 } from 'lucide-react';
@@ -34,6 +35,13 @@ const Sidebar = () => {
       label: 'Tasks',
       color: '#34a853', // Google Green
       bgColor: '#e6f4ea'
+    },
+    {
+      path: '/app/time',
+      icon: Clock,
+      label: 'Time Tracking',
+      color: '#ea4335', // Google Red
+      bgColor: '#fce8e6'
     },
     {
       path: '/app/kanban',

@@ -12,6 +12,7 @@ import ProjectDetail from './pages/ProjectDetail';
 import Tasks from './pages/Tasks';
 import TaskDetail from './pages/TaskDetail';
 import Kanban from './pages/Kanban';
+import TimeTracking from './pages/TimeTracking';
 import ProfileSettings from './pages/ProfileSettings';
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
               <Route path="projects/:id" element={<ProjectDetail />} />
               <Route path="tasks" element={<Tasks />} />
               <Route path="tasks/:id" element={<TaskDetail />} />
+              <Route path="time" element={<TimeTracking />} />
               <Route path="kanban" element={<Kanban />} />
               <Route path="settings" element={<ProfileSettings />} />
             </Route>
