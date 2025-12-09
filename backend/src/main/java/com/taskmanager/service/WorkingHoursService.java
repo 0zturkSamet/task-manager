@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class WorkingHoursService {
 
     @Transactional
     public WorkingHoursConfigDTO updateConfig(String userId, WorkingHoursConfigDTO dto) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         UserWorkingHours config = workingHoursRepository.findByUserId(userId)
@@ -64,7 +65,7 @@ public class WorkingHoursService {
     }
 
     private UserWorkingHours createDefaultConfig(String userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         UserWorkingHours defaultConfig = UserWorkingHours.getDefault(user);
